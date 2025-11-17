@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# Display DNS information for a domain or its subdomains
+
+
+get_record() {
+    local domain="$1"
+    local subdomain="$2"
+    local full="${subdomain}.${domain}"
+
+    # Extract first line form answr section
+    local answer
+    answer=$(dig "$full" | awk '/ANSWER SECTION:/ {getline; print}')
+
+    # Extract DNS type and destination
+    local record_type
+    local destination
+    record_type=$(echo "$answer" | awk '{print $4}')
+    destination=$(echo "$answer" | awk '{print $5}')
+
+    echo "The subdomain $subdomain is a $record_type record and point to $destination"
+
+}
+
+domain="$1"
+subdomain="$2"
+
+# If user did not pass anything
+if [ -z "$domain" ]; then
+    echo "Usage: $0 domain [subdomain]"
+    exit 1
+fi
+
+#If only domain given script prints all
+if [ -z "$sub" ]; then
+    for s in www lb-01 web-01 web-02; do
+        get_record "$domain" "$s"
+    done
+else
+   #Specific subdomain
+   get_record "$domain" "$sub"
+fi
+
